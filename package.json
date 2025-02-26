@@ -1,12 +1,13 @@
 {
   "name": "@rsxt/react-listener",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "A lightweight React hook for event listeners with debounce and cleanup support.",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
     "build": "node esbuild.config.mjs",
+    "release": "node release.js",
     "test": "jest --env=jsdom",
     "test:watch": "jest --watch ./test"
   },
