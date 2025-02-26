@@ -20,7 +20,7 @@ export type EventCallback<E extends Event = Event> = (event: E) => void;
  * @param options - Additional configurations for listener behavior.
  */
 export function useListener<T extends EventTarget, E extends Event>(
-  target: T | { current: T | null | undefined } = window as unknown as T,
+  target: T | { current: T | null | undefined } | undefined,
   eventTypes: string | string[],
   callback: EventCallback<E>,
   options: ListenerOptions = {}
@@ -38,14 +38,13 @@ export function useListener<T extends EventTarget, E extends Event>(
   const timerRef = useRef<number | null>(null);
   const hasRunOnce = useRef(false);
 
-  // ✅ Properly typed event handler
   const eventHandler = useCallback(
     (event: E) => {
-      if (!enabled) return;
-      if (once && hasRunOnce.current) return; // ✅ Ensures the event fires only once
+      if (typeof document === "undefined" || !enabled) return;
+      if (once && hasRunOnce.current) return; // Ensures the event fires only once
 
       hasRunOnce.current = true;
-      if (!once) hasRunOnce.current = false; // ✅ Reset if `once` is false
+      if (!once) hasRunOnce.current = false; // Reset if `once` is false
 
       if (delay) {
         setTimeout(() => callback(event), delay);
@@ -64,18 +63,23 @@ export function useListener<T extends EventTarget, E extends Event>(
   );
 
   useEffect(() => {
-    if (!enabled) return;
+    if (
+      typeof window === "undefined" ||
+      typeof document === "undefined" ||
+      !enabled
+    )
+      return;
 
     const elements: EventTarget[] = [];
+    const resolvedTarget =
+      target && "current" in target ? target.current : target || window;
 
     if (targetSelector) {
       document
         .querySelectorAll(targetSelector)
         .forEach((el) => elements.push(el as EventTarget));
-    } else {
-      const resolvedTarget =
-        target && "current" in target ? target.current : target;
-      if (resolvedTarget) elements.push(resolvedTarget);
+    } else if (resolvedTarget) {
+      elements.push(resolvedTarget);
     }
 
     if (elements.length === 0) return;
@@ -112,8 +116,11 @@ export function useListener<T extends EventTarget, E extends Event>(
   ]);
 
   return () => {
+    if (typeof window === "undefined" || typeof document === "undefined")
+      return;
+
     const resolvedTarget =
-      target && "current" in target ? target.current : target;
+      target && "current" in target ? target.current : target || window;
     if (resolvedTarget) {
       const events = Array.isArray(eventTypes) ? eventTypes : [eventTypes];
       events.forEach((event) => {
