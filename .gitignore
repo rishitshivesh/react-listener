@@ -4,7 +4,6 @@ node_modules/
 .pnp.*
 
 # Build output
-lib/
 dist/
 *.js.map
 
