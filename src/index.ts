@@ -10,21 +10,19 @@ interface ListenerOptions {
   targetSelector?: string;
 }
 
-type EventTarget = HTMLElement | Window | Document | null;
-type EventCallback<T extends Event = Event> = (event: T) => void;
+export type EventCallback<E extends Event = Event> = (event: E) => void;
 
 /**
- * useListener - A versatile event listener hook for React.
- *
+ * `useListener` - A versatile event listener hook for React.
  * @param target - The target element, ref, or selector to attach the event(s) to.
  * @param eventTypes - The event name(s) (e.g., 'click' or ['mousedown', 'mouseup']).
  * @param callback - The event handler function.
  * @param options - Additional configurations for listener behavior.
  */
-export function useListener(
-  target: EventTarget | { current: EventTarget | null | undefined } = window,
+export function useListener<T extends EventTarget, E extends Event>(
+  target: T | { current: T | null | undefined } = window as unknown as T,
   eventTypes: string | string[],
-  callback: EventCallback,
+  callback: EventCallback<E>,
   options: ListenerOptions = {}
 ) {
   const {
@@ -36,15 +34,18 @@ export function useListener(
     passive,
     targetSelector,
   } = options;
+
   const timerRef = useRef<number | null>(null);
   const hasRunOnce = useRef(false);
 
+  // ✅ Properly typed event handler
   const eventHandler = useCallback(
-    (event: Event) => {
+    (event: E) => {
       if (!enabled) return;
-
       if (once && hasRunOnce.current) return; // ✅ Ensures the event fires only once
+
       hasRunOnce.current = true;
+      if (!once) hasRunOnce.current = false; // ✅ Reset if `once` is false
 
       if (delay) {
         setTimeout(() => callback(event), delay);
@@ -53,9 +54,7 @@ export function useListener(
 
       if (debounce) {
         if (timerRef.current) clearTimeout(timerRef.current);
-        timerRef.current = window.setTimeout(() => {
-          callback(event);
-        }, debounce);
+        timerRef.current = window.setTimeout(() => callback(event), debounce);
         return;
       }
 
@@ -85,16 +84,21 @@ export function useListener(
 
     elements.forEach((el) => {
       events.forEach((event) => {
-        el?.addEventListener(event, eventHandler, { capture, passive, once });
+        el?.addEventListener(event, eventHandler as EventListener, {
+          capture,
+          passive,
+          once,
+        });
       });
     });
 
     return () => {
       elements.forEach((el) => {
         events.forEach((event) => {
-          el?.removeEventListener(event, eventHandler);
+          el?.removeEventListener(event, eventHandler as EventListener);
         });
       });
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, [
     target,
@@ -113,7 +117,10 @@ export function useListener(
     if (resolvedTarget) {
       const events = Array.isArray(eventTypes) ? eventTypes : [eventTypes];
       events.forEach((event) => {
-        resolvedTarget.removeEventListener(event, eventHandler);
+        resolvedTarget.removeEventListener(
+          event,
+          eventHandler as EventListener
+        );
       });
     }
   };
