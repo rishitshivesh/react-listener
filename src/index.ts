@@ -11,7 +11,7 @@ interface ListenerOptions {
 }
 
 type EventTarget = HTMLElement | Window | Document | null;
-type EventCallback = (event: Event) => void;
+type EventCallback<T extends Event = Event> = (event: T) => void;
 
 /**
  * useListener - A versatile event listener hook for React.
