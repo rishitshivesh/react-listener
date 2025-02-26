@@ -29,6 +29,6 @@ execSync("git push --tags", { stdio: "inherit" });
 
 // Publish to npm
 console.log("📢 Publishing to npm...");
-execSync("yarn publish --access public", { stdio: "inherit" });
+execSync("npm publish --access public", { stdio: "inherit" });
 
 console.log(`✅ Successfully released ${packageName} v${newVersion}`);
