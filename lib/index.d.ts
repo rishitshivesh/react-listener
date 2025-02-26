@@ -15,7 +15,7 @@ export type EventCallback<E extends Event = Event> = (event: E) => void;
  * @param callback - The event handler function.
  * @param options - Additional configurations for listener behavior.
  */
-export declare function useListener<T extends EventTarget, E extends Event>(target: (T | {
+export declare function useListener<T extends EventTarget, E extends Event>(target: T | {
     current: T | null | undefined;
-}) | undefined, eventTypes: string | string[], callback: EventCallback<E>, options?: ListenerOptions): () => void;
+} | undefined, eventTypes: string | string[], callback: EventCallback<E>, options?: ListenerOptions): () => void;
 export {};
