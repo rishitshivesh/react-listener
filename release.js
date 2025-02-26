@@ -3,7 +3,9 @@ const { execSync } = require("child_process");
 const versionType = process.argv[2] || "patch"; // Default to "patch"
 const packageJson = require("./package.json");
 const packageName = packageJson.name;
-const newVersion = execSync(`yarn version ${versionType}`, { encoding: "utf-8" }).trim();
+execSync(`yarn version ${versionType}`, { encoding: "utf-8" }).trim();
+
+const newVersion = packageJson.version;
 
 // Build the package
 console.log("📦 Building the package...");
