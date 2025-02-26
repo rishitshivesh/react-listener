@@ -20,7 +20,12 @@ execSync(`git tag v${newVersion}`, { stdio: "inherit" });
 
 // Push changes
 console.log("🚀 Pushing changes and tags to remote...");
-execSync("git push && git push --tags", { stdio: "inherit" });
+execSync("git push origin HEAD", { stdio: "inherit" });
+
+
+// Push changes
+console.log("🚀 Pushing changes and tags to remote...");
+execSync("git push --tags", { stdio: "inherit" });
 
 // Publish to npm
 console.log("📢 Publishing to npm...");
